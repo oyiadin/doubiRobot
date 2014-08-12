@@ -171,7 +171,7 @@ if __name__ == "__main__":
     tornado.log.enable_pretty_logging()
     tornado.autoreload.start()
 
-    webqq = Client(int(sys.argv[1]), sys.argv[2], True)
+    webqq = Client(int(sys.argv[1]), sys.argv[2])
     try:
         webqq.run()
     except:
