@@ -50,29 +50,32 @@ class Client(WebQQClient):
                              send_uin, source):
         content = content.strip().lower()
         if content == 'help' or content == '帮助':
-            content = '''\
+            content = '''
 逗比机器人使用指南：
-    help - 发送本消息
-    help calc - 计算器使用指南
-    ping - 看看机器人是否还在工作
-    pause - 暂停关键字监测
+    help: 发送本指南
+    help calc:  计算器使用指南
+    ping: 看看机器人是否还在工作
     start - 重新开启关键字监测
-    about - 查看机器人的详细信息'''
+    pause: 暂停关键字监测
+    about - 关于这个项目'''
 
         elif content == 'help calc' or content == 'calc' \
-            or content == '计算器':
-            content = '''\
+            or content == '计算器' or content == '计算器帮助':
+            content = '''
+召唤格式:式子=
 加:+ 减:-
 乘:* 除:/
 乘方:**
-abs() 绝对数
+abs(x) 绝对数
 log(x,底数) 对数
-sqrt() 方根
-sin() 正弦*
-cos() 余弦*
-tan() 正切*
-*: 三角函数括号内的数值为弧度，要使用之前需要使用 degress(角度) 进行转换。
-   比如 sin(45°) 需写 sin(degrees(45))=
+sqrt(x) 方根
+sin(r) 正弦*
+cos(r) 余弦*
+tan(r) 正切*
+*  三角函数括号内的数值为弧度，
+   要使用之前需要使用 radians(角度值) 进行转换。
+   比如 sin(45°) 需写 sin(radians(45))=
+以下不解释，需要用的自会看懂：
 asin() acos() atan()
 sinh() cosh() tanh()
 圆周率:pi
@@ -93,7 +96,7 @@ sinh() cosh() tanh()
                 '喵喵喵']
 
         elif content == 'about' or content == '关于':
-            content = '''\
+            content = '''
 暂定名称：逗比机器人
 作者：@oyiadin(陈晓源)
 源码：https://github.com/oyiadin/doubiRobot
