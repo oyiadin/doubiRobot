@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-#
-#   Author  :   cold
-#   E-mail  :   wh_linux@126.com
-#   Date    :   13/11/14 13:23:49
-#   Desc    :
-#
 """
     usage:
         python echobot.py [qq] [password]
@@ -19,7 +13,7 @@ math = vars(math)
 
 from twqq.client import WebQQClient
 from twqq.requests import system_message_handler, group_message_handler
-from twqq.requests import buddy_message_handler, register_request_handler
+from twqq.requests import buddy_message_handler
 from twqq.requests import PollMessageRequest
 
 import tornado.autoreload
@@ -39,10 +33,10 @@ class Client(WebQQClient):
         super(Client, self).__init__(*args, **kwargs)
 
     def handle_verify_code(self, path, r, uin):
-        logger.info(u"验证码本地路径为: {0}".format(path))
+        logger.info("验证码本地路径为: {0}".format(path))
         check_code = None
         while not check_code:
-            check_code = input(u"输入验证码: ")
+            check_code = raw_input("输入验证码: ")
         self.enter_verify_code(check_code, r, uin)
 
 
@@ -56,19 +50,33 @@ class Client(WebQQClient):
                              send_uin, source):
         content = content.strip().lower()
         if content == 'help' or content == '帮助':
-            content = '''逗比机器人使用指南：
+            content = '''\
+逗比机器人使用指南：
     help - 发送本消息
     help calc - 计算器使用指南
     ping - 看看机器人是否还在工作
     pause - 暂停关键字监测
-    start - 重新开启关键字监测'''
+    start - 重新开启关键字监测
+    about - 查看机器人的详细信息'''
 
-        elif content == 'help calc':
-            content = '''加减乘除分别是 + - * /，乘方是 **
-圆周率是 pi，自然底数是 e
-abs() - 取绝对数
-
-另外，除法还有问题，出错了别怪我……'''
+        elif content == 'help calc' or content == 'calc' \
+            or content == '计算器':
+            content = '''\
+加:+ 减:-
+乘:* 除:/
+乘方:**
+abs() 绝对数
+log(x,底数) 对数
+sqrt() 方根
+sin() 正弦*
+cos() 余弦*
+tan() 正切*
+*: 三角函数括号内的数值为弧度，要使用之前需要使用 degress(角度) 进行转换。
+   比如 sin(45°) 需写 sin(degrees(45))=
+asin() acos() atan()
+sinh() cosh() tanh()
+圆周率:pi
+自然底数:e'''
 
         elif content == 'ping':
             content = [
@@ -83,6 +91,14 @@ abs() - 取绝对数
                 '想搞基？',
                 '来搞基么',
                 '喵喵喵']
+
+        elif content == 'about' or content == '关于':
+            content = '''\
+暂定名称：逗比机器人
+作者：@oyiadin(陈晓源)
+源码：https://github.com/oyiadin/doubiRobot
+
+正在开发的下一代名称为 Thirq'''
 
         elif content == 'pause':
             self.keywords = False
@@ -149,23 +165,16 @@ abs() - 取绝对数
         self.hub.send_buddy_msg(from_uin, content)
 
 
-    # @register_request_handler(PollMessageRequest)
-    # def handle_qq_errcode(self, request, resp, data):
-    #     if data and data.get("retcode") in [121, 100006]:
-    #         logger.error(u"获取登出消息 {0!r}".format(data))
-    #         exit()
-
-
 if __name__ == "__main__":
-    import sys
     import tornado.log
 
     tornado.log.enable_pretty_logging()
-    # tornado.autoreload.start()
+    tornado.autoreload.start()
 
     webqq = Client(int(sys.argv[1]), sys.argv[2], True)
     try:
         webqq.run()
-    finally:
+    except:
         print 'Exit now'
         webqq.disconnect()
+        raise
