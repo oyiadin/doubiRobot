@@ -144,7 +144,10 @@ sinh() cosh() tanh()
                 # 我忘记 Exception 是不是所有异常的祖先了……所以为了保险
 
         elif i == last_msg and self.enable_break:
-            content = '破'
+            if not i == '破':
+                content = '破'
+            else:
+                content = '防跟队形补丁启用'
 
         elif not self.keywords:
              return
