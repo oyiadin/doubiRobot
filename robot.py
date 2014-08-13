@@ -27,11 +27,10 @@ sys.setdefaultencoding('UTF-8')
 logger = logging.getLogger("client")
 from copy import copy
 
-math = vars(math)
-del math['__builtins__']
-for func in ['sin', 'cos', 'tan']:
-    math['_{0}'.format(func)] = math[func]
-    math[func] = lambda x: math['_{0}'.format(func)](math['radians'](x))
+_math = vars(math)
+_math['_sin'] = lambda x: math.sin(math.radians(x))
+_math['_cos'] = lambda x: math.cos(math.radians(x))
+_math['_tan'] = lambda x: math.tan(math.radians(x))
 
 
 class Client(WebQQClient):
@@ -115,21 +114,22 @@ sinh() cosh() tanh()
 
 正在开发的下一代名称为 Thirq'''
 
-        elif content == 'pause':
+        elif content == 'pause' or content == '暂停':
             self.keywords = False
             content = '关键词监测已关闭'
 
-        elif content == 'start':
+        elif content == 'start' or content == '开始':
             self.keywords = True
             content = '关键词监测已开启'
 
-        else:
-            if not self.keywords:
-                return
+        elif not self.keywords:
+             return
 
+        else:
             if content.endswith('='):
+                content = re.sub(r'(sin|cos|tan)', r'_\1', content)
                 try:
-                    content = content + str(eval(content[:-1], math, {}))
+                    content = content + str(eval(content[:-1], _math, {}))
                 except Exception, msg:
                     content = '发生错误:' + str(msg)
                 except:
@@ -175,6 +175,8 @@ sinh() cosh() tanh()
 
         if isinstance(content, list):
             content = random.choice(content)
+
+        self.last_msg = content
 
         self.hub.send_group_msg(group_code, u"@{0}: {1}".format(member_nick, content))
 
