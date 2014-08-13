@@ -146,6 +146,8 @@ sinh() cosh() tanh()
         elif i == last_msg and self.enable_break:
             if not i == '破':
                 content = '破'
+            elif i.endswith('破'):
+                content = '破队形'
             else:
                 content = '防跟队形补丁启用'
 
