@@ -136,14 +136,14 @@ sinh() cosh() tanh()
         elif i.endswith('='):
             exp = re.sub(r'(sin|cos|tan)', r'_\1', i)
             try:
-                content = i + str(eval(i[:-1], _math, {}))
+                content = i + str(eval(exp[:-1], _math, {}))
             except Exception, msg:
                 content = '发生错误:' + str(msg)
             except:
                 return
                 # 我忘记 Exception 是不是所有异常的祖先了……所以为了保险
 
-        elif i == last_msg:
+        elif i == last_msg and self.enable_break:
             content = '破'
 
         elif not self.keywords:
