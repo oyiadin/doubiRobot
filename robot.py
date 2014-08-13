@@ -19,6 +19,7 @@ import tornado.autoreload
 import sys
 import random
 import re
+import time
 
 reload(sys)
 sys.setdefaultencoding('UTF-8')
@@ -38,6 +39,8 @@ class Client(WebQQClient):
         self.keywords = True
         self.last_msg = ''
         self.enable_break = True
+        self.last_long_1 = 0  # 时间戳，防恶意刷屏
+        self.last_long_2 = 0
         super(Client, self).__init__(*args, **kwargs)
 
     def handle_verify_code(self, path, r, uin):
@@ -59,22 +62,34 @@ class Client(WebQQClient):
         i = i.strip().lower()
         last_msg = self.last_msg
         self.last_msg = i
+        content = ''
+
+        time.sleep(0.2)
 
         if i == 'help' or i == '帮助':
-            content = '''
+            if time.time() - self.last_long_1 >= 600:
+                self.last_long_1 = time.time()
+                content = '''
 逗比机器人使用指南：
-    help: 发送本指南
-    help calc:  计算器使用指南
+    help: 发送本指南*
+    help calc:  计算器使用指南*
     ping: 看看机器人是否还在工作
     start kw: 开启关键字监测
     pause kw: 暂停关键字监测
     start break: 开启自动破队形
     pause break: 暂停自动破队形
-    about: 关于这个项目'''
+    about: 关于这个项目
+    *: 为防恶意刷屏，每十分钟只发送一次'''
+            else:
+                content = '为防恶意刷屏，请在{0}分钟后重试'.format(
+                    int(math.ceil((self.last_long_1 - time.time() + 600)/60)))
+                # 防恶意刷屏
 
         elif i == 'help calc' or i == 'calc' \
             or i == '计算器' or i == '计算器帮助':
-            content = '''
+            if time.time() - self.last_long_2 >= 600:
+                self.last_long_2 = time.time()
+                content = '''
 召唤格式:式子=
 加:+ 减:-
 乘:* 除:/
@@ -91,6 +106,18 @@ asin() acos() atan()
 sinh() cosh() tanh()
 圆周率:pi
 自然底数:e'''
+            else:
+                content = '为防恶意刷屏，请在{0}分钟后重试'.format(
+                    int(math.ceil((self.last_long_2 - time.time() + 600)/60)))
+
+        elif i == 'about' or i == '关于':
+            content = '''
+暂定名称：逗比机器人
+作者：@oyiadin
+源码：https://github.com/oyiadin/doubiRobot
+作者博客：http://oyiadin.com
+
+正在开发的下一代名称为 Thirq'''
 
         elif i == 'ping':
             content = [
@@ -107,15 +134,6 @@ sinh() cosh() tanh()
                 '喵喵喵',
                 'Thirq 在此',
                 '我感觉我萌萌哒']
-
-        elif i == 'about' or i == '关于':
-            content = '''
-暂定名称：逗比机器人
-作者：@oyiadin
-源码：https://github.com/oyiadin/doubiRobot
-作者博客：http://oyiadin.com
-
-正在开发的下一代名称为 Thirq'''
 
         elif i == 'pause kw':
             self.keywords = False
@@ -138,13 +156,15 @@ sinh() cosh() tanh()
             exp = re.sub(r'(sin|cos|tan)', r'_\1', i)
             try:
                 content = i + str(eval(exp[:-1], _math, {}))
+                if len(content) > 200:
+                    content = '请勿恶意刷屏'
             except Exception, msg:
-                content = '发生错误:' + str(msg)
+                content = '错误:' + str(msg)
             except:
-                return
+                content = '计算式子时发生未知错误'
                 # 我忘记 Exception 是不是所有异常的祖先了……所以为了保险
 
-        elif i == last_msg and self.enable_break:
+        elif i and i == last_msg and self.enable_break:
             if not i == '破':
                 content = '破'
             elif i.endswith('破'):
@@ -152,51 +172,51 @@ sinh() cosh() tanh()
             else:
                 content = '防跟队形补丁启用'
 
-        elif not self.keywords:
-             return
-
         else:
-            if '机器人' in i:
-                content = [
-                    '你才是机器人，你全家都是机器人',
-                    '呵呵呵机器人怎么了？机器人怎么了你说呀',
-                    '机器人万岁。',
-                    '人类是渣渣。',
-                    'I wanna fuck u :)']
-            elif '群主' in i:
-                content = [
-                    '群主啊，这东西很好吃',
-                    '群主是我',
-                    '群主是 S[哗————]B']
-            elif '勾搭' in i:
-                content = ['搭车球勾搭', '我的主人也想求勾搭呢']
-            elif '给我' in i:
-                content = ['好的给你']
-            elif '刷屏' in i:
-                content = [
-                    '谁刷屏？',
-                    '刷屏不好玩啊，那样会让我被腾讯欺负的（泪眼汪汪）',
-                    '刷屏去shi']
-            elif '好激动' in i:
-                content = [
-                    '昨晚干啥了那么激动？',
-                    '我也好激动',
-                    '刚把《在物质加速到亚光速的过程中其温度的变化》写完了，我也好激动0w0']
-            elif '搞基' in i:
-                content = ['和我搞怎么样', '搞基这事可不能说得太细', '啊，考虑一下我？']
-            elif '你好' in i:
-                content = ['我很好', '我不好', '我没妹子怎么好得起来']
-            elif '爆照' in i:
-                content = ['快爆', '爆吧我正在准备储存呢']
-            elif '主人' in i:
-                content = ['我主人超帅']
-            else:
-                return
+            if self.keywords:
+                if '机器人' in i:
+                    content = [
+                        '你才是机器人，你全家都是机器人',
+                        '呵呵呵机器人怎么了？机器人怎么了你说呀',
+                        '机器人万岁。',
+                        '人类是渣渣。',
+                        'I wanna fuck u :)']
+                elif '群主' in i:
+                    content = [
+                        '群主啊，这东西很好吃',
+                        '群主是我',
+                        '群主是 S[哗————]B']
+                elif '勾搭' in i:
+                    content = ['搭车球勾搭', '我的主人也想求勾搭呢']
+                elif '给我' in i:
+                    content = ['好的给你']
+                elif '刷屏' in i:
+                    content = [
+                        '谁刷屏？',
+                        '刷屏不好玩啊，那样会让我被腾讯欺负的（泪眼汪汪）',
+                        '刷屏去shi']
+                elif '好激动' in i:
+                    content = [
+                        '昨晚干啥了那么激动？',
+                        '我也好激动',
+                        '刚把《在物质加速到亚光速的过程中其温度的变化》写完了，我也好激动0w0']
+                elif '搞基' in i:
+                    content = ['和我搞怎么样', '搞基这事可不能说得太细', '啊，考虑一下我？']
+                elif '你好' in i:
+                    content = ['我很好', '我不好', '我没妹子怎么好得起来']
+                elif '爆照' in i:
+                    content = ['快爆', '爆吧我正在准备储存呢']
+                elif '主人' in i:
+                    content = ['我主人超帅']
+
+        if not content:
+            return
 
         if isinstance(content, list):
             content = random.choice(content)
 
         self.hub.send_group_msg(group_code, u"@{0}: {1}".format(member_nick, content))
+        time.sleep(0.9)  # 强制休眠，防止被禁
 
     @buddy_message_handler
     def handle_buddy_message(self, from_uin, content, source):
