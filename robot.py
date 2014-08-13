@@ -151,7 +151,7 @@ sinh() cosh() tanh()
             self.enable_break = True
             content = '自动破队形已开启'
 
-        elif i.endswith('=') and not i == '= =':
+        elif i.endswith('=') and not i == '= =' and not i == '==':
             # = =....
             exp = re.sub(r'(sin|cos|tan)', r'_\1', i)
             try:
@@ -167,10 +167,11 @@ sinh() cosh() tanh()
         elif i and i == last_msg and self.enable_break:
             if not i == '破':
                 content = '破'
-            elif i.endswith('破'):
-                content = '破队形'
             else:
-                content = '防跟队形补丁启用'
+                if i.endwith('防跟队形补丁启用'):
+                    content = '哼我继续破队形'
+                else:
+                    content = '防跟队形补丁启用'
 
         else:
             if self.keywords:
