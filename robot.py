@@ -151,7 +151,7 @@ sinh() cosh() tanh()
             self.enable_break = True
             content = '自动破队形已开启'
 
-        elif i.endswith('=') and not i == '= =' and not i == '==':
+        elif i.endswith('=') and not i.endswith('= =') and not i.endswith('=='):
             # = =....
             exp = re.sub(r'(sin|cos|tan)', r'_\1', i)
             try:
