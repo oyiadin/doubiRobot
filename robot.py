@@ -64,7 +64,7 @@ class Client(WebQQClient):
         self.last_msg = i
         content = ''
 
-        time.sleep(0.2)
+        time.sleep(0.1)
 
         if i == 'help' or i == '帮助':
             if time.time() - self.last_long_1 >= 600:
@@ -133,7 +133,12 @@ sinh() cosh() tanh()
                 '来搞基么',
                 '喵喵喵',
                 'Thirq 在此',
-                '我感觉我萌萌哒']
+                '我感觉我萌萌哒',
+                '噗',
+                '不在']
+
+        elif i == '噗':
+            content = '噗噗噗'
 
         elif i == 'pause kw':
             self.keywords = False
